@@ -2,8 +2,10 @@ package a.olarte.retosolverapi.enumerated;
 
 public enum ErrorResult {
 
-	EMPTRY_RESULT("%s vacío o null"),
+	NULL_RESULT("%s con valor null"),
+	EMPTY_RESULT("%s con valor vacío"),
     INVALID_ARGUMENT("%s no válido"),
+    INVALID_LENGTH("%s con valor demasiado largo"),
     ;
     private String message;
  

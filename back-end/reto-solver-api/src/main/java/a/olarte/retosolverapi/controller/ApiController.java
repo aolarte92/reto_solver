@@ -1,9 +1,6 @@
 package a.olarte.retosolverapi.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 
 import a.olarte.retosolverapi.service.CompanyService;
 import io.swagger.annotations.ApiOperation;
@@ -38,20 +32,24 @@ public class ApiController {
 	}
 	
 	@PostMapping("/reto")
-	public void test (
+	public void reto (
 			@RequestParam(value="doc") String doc,
 			@RequestParam(value="file") MultipartFile input,
 			HttpServletResponse response
-			) throws IOException{
-		response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+			) throws IOException {
+		
+		response.setContentType("text/plain");
 		response.setHeader("Content-Disposition", "attachment; filename=prueba_output.txt");
+		response.setCharacterEncoding("utf-8");
 		try {
-			ServletOutputStream out = response.getOutputStream();
-			out.print(companyService.createTrace(doc, input));
-			out.close();
+			response.getWriter().write(companyService.createTrace(doc, input));
+			response.flushBuffer();
+//			return new ResponseEntity<>(companyService.createTrace(doc, input), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+			response.getWriter().write(e.getMessage());
+			response.flushBuffer();
+//			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 	

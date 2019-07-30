@@ -29,8 +29,10 @@ public class TraceBuilder extends AbstractBuilder<TraceModel> {
 
 	@Override
 	public void validate() {
-		Preconditions.checkNotNull(instance.getDocumentNumber(), new BussinessException(String.format(ErrorResult.EMPTRY_RESULT.getMessage(), "Número de documento")));
-		Preconditions.checkNotNull(instance.getFileInputUrl(), new BussinessException(String.format(ErrorResult.EMPTRY_RESULT.getMessage(), "Archivo de entrada")));
+		Preconditions.checkNotNull(instance.getDocumentNumber(), new BussinessException(String.format(ErrorResult.NULL_RESULT.getMessage(), "Número de documento")));
+		Preconditions.checkArgument(!instance.getDocumentNumber().isEmpty(), new BussinessException(String.format(ErrorResult.EMPTY_RESULT.getMessage(), "Número de documento")));
+		Preconditions.checkArgument(instance.getDocumentNumber().length() <= 20, new BussinessException(String.format(ErrorResult.INVALID_LENGTH.getMessage(), "Número de documento")));
+		Preconditions.checkNotNull(instance.getFileInputUrl(), new BussinessException(String.format(ErrorResult.NULL_RESULT.getMessage(), "Archivo de entrada")));
 		
 	}
 

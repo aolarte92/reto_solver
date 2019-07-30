@@ -43,36 +43,62 @@ public class CompanyService {
 		return traceRepository.findAll();
 	}
 
+	/**
+	 * 
+	 * @param doc
+	 * @param fileInput
+	 * @return
+	 * @throws Exception
+	 */
 	@Transactional
 	public String createTrace(String doc, MultipartFile fileInput) throws Exception {
-		String fileUrl = null;
+		String inputFileUrl = null, outputFileUrl = "";
 		if (!fileInput.isEmpty())
-			fileUrl = amazonService.uploadFile(fileInput, DirectoryType.INPUT_DIRECTORY.getUrl());
+			inputFileUrl = amazonService.uploadFile(fileInput, DirectoryType.INPUT_DIRECTORY.getUrl());
 		List<Integer> elements = this.readInputFile(FileHelper.multipartToFile(fileInput, "prueba_input.txt"));
 		String outputString = validateElements(elements);
 		TraceModel tm = new TraceBuilder()
 				.setDocumentNumber(doc)
-				.setFileInputUrl(fileUrl)
+				.setFileInputUrl(inputFileUrl)
 				.setMsg(outputString)
 				.build();
 		tm = this.saveTrace(tm);
+		
 		return outputString;
+//		outputFileUrl = amazonService.uploadFile(this.writeOutputFile(outputString), "prueba_output.txt", DirectoryType.OUTPUT_DIRECTORY.getUrl());
+//		return outputFileUrl;
+		
 	}
+	/**
+	 * 
+	 * @param filetext
+	 * @return
+	 * @throws IOException
+	 */
 	private List<Integer> readInputFile(File filetext) throws IOException {
 		List<Integer> elements = new ArrayList<>();	
 		Stream<String> multilineas = Files.lines(filetext.toPath());
 		for (Iterator<String> iterator = multilineas.iterator(); iterator.hasNext();)
 			elements.add(Integer.parseInt(iterator.next()));
 		multilineas.close();
+		//test
 		System.out.println(elements.toString());
 		return elements;
 	}
+	/**
+	 * 
+	 * @param elements
+	 * @return
+	 * @throws Exception
+	 */
 	private String validateElements(List<Integer> elements) throws Exception {
 		int T = elements.get(0), day = 1;
 		StringBuffer days = new StringBuffer();
 		if(T < 1 || T > 500)
 			throw new Exception("Restricción: 1 ≤ T ≤ 500");
 		for (int i = 1; i < elements.size(); i += (elements.get(i) + 1)) {
+			if((i + 1 + elements.get(i)) > elements.size())
+				throw new Exception(String.format("Restricción: no existen N valores de Wi suficientes para el dia %s",day));
 			if(elements.get(i) < 1 || elements.get(i) > 100) 
 				throw new Exception(String.format("Restricción: 1 ≤ N ≤ 100 en la linea %s",i));
 			else 
@@ -81,7 +107,14 @@ public class CompanyService {
 		} 
 		return days.toString();
 	}
-	
+	/**
+	 * 
+	 * @param N
+	 * @param Wi
+	 * @param day
+	 * @return
+	 * @throws Exception
+	 */
 	private int validateElementsDay(int N, List<Integer> Wi, int day) throws Exception {
 		if(Wi.size() != N)
 			throw new Exception("Restricción: No se representan los N elementos");
@@ -93,7 +126,7 @@ public class CompanyService {
 		int sum = Wi.stream().mapToInt(Integer::intValue).sum();
 		if(sum < 50)
 			throw new Exception(String.format("Restricción: el peso de los elementos del dia %s NO alcanza las 50 libras",day));
-		
+		//test
 		System.out.println(String.format("Case #%s = [%s] %s = sum:%s, max:%s, min:%s",day,N,Wi.toString(),sum,max,min));
 		
 		return getMaximumtrips(new ArrayList<Integer>(Wi));
@@ -119,6 +152,19 @@ public class CompanyService {
 		}
 		return count;
 	}
+	/**
+	 * 
+	 * @param days
+	 * @return
+	 * @throws IOException
+	 */
+    private File writeOutputFile(String days) throws IOException {
+        File filetext = File.createTempFile("prueba_output", ".txt");
+        FileWriter writer = new FileWriter(filetext);
+        writer.append(days);
+        writer.close();
+        return filetext;
+    }
 
 	
 }
