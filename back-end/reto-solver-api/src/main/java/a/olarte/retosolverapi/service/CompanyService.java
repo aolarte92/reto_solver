@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -41,15 +42,16 @@ public class CompanyService {
 	}
 
 	@Transactional
-	public TraceModel createTrace(String doc, MultipartFile fileInput) throws IllegalStateException, IOException {
+	public TraceModel createTrace(String doc, MultipartFile fileInput) throws Exception {
 
 		String fileUrl = null;
 		if (!fileInput.isEmpty())
 			fileUrl = amazonService.uploadFile(fileInput, DirectoryType.INPUT_DIRECTORY.getUrl());
 
 		// TODO: mensaje validacion inputfile
-		String msg = this.validateInputFile(FileHelper.multipartToFile(fileInput, "prueba_input.txt"));
-
+		String msg = "ok";
+		List<Integer> elements = this.readInputFile(FileHelper.multipartToFile(fileInput, "prueba_input.txt"));
+		validateElements(elements);
 		TraceModel tm = new TraceBuilder()
 				.setDocumentNumber(doc)
 				.setFileInputUrl(fileUrl)
@@ -59,28 +61,56 @@ public class CompanyService {
 		return this.saveTrace(tm);
 	}
 
-	private String validateInputFile(File filetext) throws IOException {
-		List<Integer> elementos = new ArrayList<>();	
-		int T = 0, x = 0;
+	private List<Integer> readInputFile(File filetext) throws IOException {
+		List<Integer> elements = new ArrayList<>();	
 		Stream<String> multilineas = Files.lines(filetext.toPath());
 		for (Iterator<String> iterator = multilineas.iterator(); iterator.hasNext();) {
-			x = Integer.parseInt(iterator.next());
-			elementos.add(x);
+			elements.add(Integer.parseInt(iterator.next()));
 		}
 		multilineas.close();
-		System.out.println(elementos.toString());
+		System.out.println(elements.toString());
 
-		return "ok";
+		return elements;
+	}
+	
+	private String validateElements(List<Integer> elements) throws Exception {
+		int T = elements.get(0), day = 1;
+		StringBuffer days = new StringBuffer();
+		if(T < 1 || T > 500)
+			throw new Exception("Restricción: 1 ≤ T ≤ 500");
+		for (int i = 1; i < elements.size(); i += (elements.get(i) + 1)) {
+			if(elements.get(i) < 1 || elements.get(i) > 100) {
+				throw new Exception(String.format("Restricción: 1 ≤ N ≤ 100 en la linea %s",i));
+			}else {
+				days.append(String.format("Case #%s: %s\n", day, validateElementsDay(elements.get(i), elements.subList(i+1, i + 1 + elements.get(i)), day)));
+			}
+			day++;
+				
+		} 
+		return days.toString();
+	}
+	
+	private int validateElementsDay(int N, List<Integer> Wi, int day) throws Exception {
+		
+		if(Wi.size() != N)
+			throw new Exception("Restricción: No se representan los N elementos");
+		Collections.reverse(Wi);
+		int max = Wi.stream().mapToInt(Integer::intValue).max().getAsInt();
+		int min = Wi.stream().mapToInt(Integer::intValue).min().getAsInt();
+		if( min < 1 || max > 100)
+			throw new Exception(String.format("Restricción: 1 ≤ Wi ≤ 100 en el dia  %s",day));
+		int sum = Wi.stream().mapToInt(Integer::intValue).sum();
+		if(sum < 50)
+			throw new Exception(String.format("Restricción: el peso de los elementos del dia %s NO alcanza las 50 libras",day));
+		
+		System.out.println(String.format("Case #%s = [%s] %s = sum:%s, max:%s, min:%s",day,N,Wi.toString(),sum,max,min));
+		return 1;
 	}
 
-	private void writeOutputFile() throws IOException {
+	private void writeOutputFile(String days) throws IOException {
 		File filetext = File.createTempFile("prueba_output", ".txt");
-
-		List<String> lineas = Arrays.asList("Welcome", "To java 8", "Bartolomé");
 		FileWriter writer = new FileWriter(filetext);
-		for (String linea : lineas) {
-			writer.append(linea + "\n");
-		}
+		writer.append(days);
 		writer.close();
 	}
 }

@@ -36,10 +36,10 @@ public class ApiController {
 		
 		try {
 			return new ResponseEntity<>(companyService.createTrace(doc, input), HttpStatus.OK);
-		} catch (IllegalStateException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.resolve(500));
 		}
-		return new ResponseEntity<>("", HttpStatus.resolve(500));
 	}
 	
 	@GetMapping("/traces2")

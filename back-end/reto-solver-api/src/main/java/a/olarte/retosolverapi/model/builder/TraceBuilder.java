@@ -36,7 +36,7 @@ public class TraceBuilder extends AbstractBuilder<TraceModel> {
 
 	@Override
 	public void inject() {
-		instance.setMsg((instance.getMsg().isEmpty())?"OK":"");
+		instance.setMsg((instance.getMsg().isEmpty())?"OK":instance.getMsg());
 		
 	}
 
