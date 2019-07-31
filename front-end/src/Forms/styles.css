@@ -1,0 +1,36 @@
+.required {
+    color: red
+}
+
+.div-pregunta {
+	margin-right: 60px;
+	margin-left: 60px;
+	text-align: center;
+}
+.div-pregunta > h4 {
+    font-size: medium;
+}
+
+.div-visible{
+	position: relative;
+	visibility: visible;
+}
+.div-hidden{
+	position: absolute;
+	visibility: hidden;
+	display: none;
+}
+
+/* sobreescribir div's calendar */
+.datepickerWrap .react-datepicker-wrapper{
+	width: 100%;
+}
+.datepickerWrap  div .react-datepicker-wrapper{
+	width: 100%;
+}
+.datepickerWrap .react-datepicker__input-container{
+	width: 100%;
+}
+.datepickerWrap  div .react-datepicker__input-container{
+	width: 100%;
+}
